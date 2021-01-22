@@ -22,8 +22,8 @@ print(" START SCRIPT ")
 print("**************")
 
 period = 36     ;36
-
-name = "nmmb_WEASD_int2020121612_val2020121800"
+model = "gfsv16"
+name = model+"_WEASD_int2020102612_val2020102800"
 
 ;-------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------
@@ -32,18 +32,18 @@ name = "nmmb_WEASD_int2020121612_val2020121800"
 	timeUnits = "hours since 1800-01-01 00:00:00"
  
         iyyyy = 2020
-        imm = 12
-        idd = 16
+        imm = 10
+        idd = 26
         ihh = 12
 
 	syyyy = 2020 
-	smm = 12
-	sdd = 16
+	smm = 10
+	sdd = 26
 	shh = 12
 
         eyyyy = 2020
-        emm = 12
-        edd = 18
+        emm = 10
+        edd = 28
         ehh = 0
 
         idate = cd_inv_calendar(iyyyy,imm,idd,ihh,00,00,timeUnits,0)
@@ -60,12 +60,6 @@ name = "nmmb_WEASD_int2020121612_val2020121800"
 diff = sdate - idate
 print("diff: "+diff)
 
-segments=period/1.
-print(segments)
-
-  snow_array = new((/toint(segments),1025,1473/),float)
-  h= 0 
-
         ; Set date strings
         ymd = ut_string(idate,"%Y%N%D")
         hour = ut_string(idate,"%H")
@@ -79,60 +73,73 @@ print("end_fhr: "+end_fhr)
 
 ;------------------------------------------
 
-do tim = start_fhr+1,end_fhr,1
+	if start_fhr .ge. 100 then
+        	fhr1 = start_fhr
+	else if start_fhr .ge. 10 .and. start_fhr .lt. 100 then
+        	fhr1 = "0"+start_fhr
+	else if start_fhr .lt. 10 then
+        	fhr1 = "00"+start_fhr
+	end if
+	end if
+	end if
+        print("fhr1: "+fhr1)
 
-	if tim .ge. 100 then
-        	fhr = tim
-	else if tim .ge. 10 .and. tim .lt. 100 then
-        	fhr = tim
-	else if tim .lt. 10 then
-        	fhr = "0"+tim
-	end if
-	end if
-	end if
-        print("fhr: "+fhr)
 
-       filename = "/scratch2/NCEPDEV/ovp/Logan.Dawson/com/hiresw."+ymd+"/hiresw.t"+hour+"z.nmmb_5km.f"+fhr+".conus.grib2"
-       if (isfilepresent(filename)) then
-          print("File found!")
+        if end_fhr .ge. 100 then
+                fhr2 = end_fhr
+        else if end_fhr .ge. 10 .and. end_fhr .lt. 100 then
+                fhr2 = "0"+end_fhr
+        else if end_fhr .lt. 10 then
+                fhr2 = "00"+end_fhr
+        end if
+        end if
+        end if
+        print("fhr2: "+fhr2)
+       
+       filename1 = "/scratch2/NCEPDEV/ovp/Marcel.Caron/MEG/data/MEG_20210204/gfs."+ymd+"/"+hour+"/"+model+"/gfs.t"+hour+"z.pgrb2.0p25.f"+fhr1+".grib2"
+       filename2 = "/scratch2/NCEPDEV/ovp/Marcel.Caron/MEG/data/MEG_20210204/gfs."+ymd+"/"+hour+"/"+model+"/gfs.t"+hour+"z.pgrb2.0p25.f"+fhr2+".grib2"
+       if (isfilepresent(filename1)) then
+          print("File1 found!")
        else
-          print("File is missing...")
+          print("File2 is missing...")
           system("pwd")
        end if
 
-       a=addfile(filename,"r")
+       if (isfilepresent(filename2)) then
+          print("File2 found!")
+       else
+          print("File2 is missing...")
+          system("pwd")
+       end if
 
-;01h WEASD_P8_L1_GLC0_acc
-;36h WEASD_P8_L1_GLC0_acc1h 
 
-if tim .le. 1 then 
-      precip = a->WEASD_P8_L1_GLC0_acc(:,:)
-else 
-      precip = a->WEASD_P8_L1_GLC0_acc1h(:,:)
-end if
-;      printVarSummary(precip_anl)
-      precip=precip*0.0393701*10.0     ; mm to inches (times 10:1 ratio)
-      lat2d = a->gridlat_0
-      lon2d = a->gridlon_0
-      precip@lat2d = lat2d
-      precip@lon2d = lon2d
-;      printMinMax(precip,True)
-      snow_array(h,:,:) = precip
-      h=h+1
+       a=addfile(filename1,"r")
+       b=addfile(filename2,"r")
 
-end do
+print("model: "+model)
+  snowvar = "WEASD_P0_L1_GLL0"
+print("snowvar: "+snowvar)
 
-      precipplot=dim_sum_n_Wrap(snow_array,0)
-;      precipplot@lat2d = lat2d
-;      precipplot@lon2d = lon2d
-
-printMinMax(precipplot,True)
+      orig_snod = a->$snowvar$(:,:)
+      new_snod = b->$snowvar$(:,:)
+;      printVarSummary(precip)
+      orig_snod=orig_snod*.03937*10    ; convert mm to inches and 10:1 ratio
+      new_snod=new_snod*.03937*10    ; convert mm to inches and 10:1 ratio
+;      lat2d = a->gridlat_0
+;      lon2d = a->gridlon_0
+;      orig_snod@lat2d = lat2d
+;      orig_snod@lon2d = lon2d
+;      new_snod@lat2d = lat2d
+;      new_snod@lon2d = lon2d
+      snowdepth_change = new_snod
+      snowdepth_change = new_snod - orig_snod
+      printMinMax(snowdepth_change,True)
 
 print("Successfully got data from files!")
 
 ;=============================================
 
-folder = (/"EC"/)
+folder = (/"OK"/)
 ;folder = (/"northamer","pacific","atlantic","europe","southpac","southamer","india","australia","africa","asia"/)   
 enddomain = dimsizes(folder)
 
@@ -344,6 +351,29 @@ tmres@tmYLValues = ispan(0,80,10)
 tmres@tmYRValues = ispan(0,80,10)
 end if
 
+if domain .eq. "OK" then
+res@mpProjection = "LambertConformal"
+res@mpLambertParallel2F = 35
+res@mpLambertParallel1F = 30
+res@mpLambertMeridianF = -97
+res@mpLimitMode = "LatLon"
+res@mpMinLatF = 31.5
+res@mpMaxLatF = 40.
+res@mpMinLonF = -105.
+res@mpMaxLonF = -91.
+delete(tmres@tmXBValues)
+tmres@tmYLOn = False
+tmres@tmYROn = False
+tmres@tmXBOn = False
+tmres@tmXBValues = ispan(-180,179,5)
+delete(tmres@tmYRValues)
+delete(tmres@tmYLValues)
+tmres@tmYLValues = ispan(0,80,5)
+tmres@tmYRValues = ispan(0,80,5)
+res@mpGridLatSpacingF := 5.
+res@mpGridLonSpacingF := 5.
+end if
+
 ;**********************************************
 
   curdate = edate	
@@ -359,7 +389,7 @@ end if
 	res@gsnRightString = " "
 	
 	res@gsnLeftStringFontColor = "black"
-	res@gsnLeftString = "(NMMB) 36-h WEASD (10:1) Init: "+ut_string(idate,"")+" | Fh: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
+	res@gsnLeftString = "("+model+") 36-h WEASD (10:1) Init: "+ut_string(idate,"")+" | F: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
 	res@gsnLeftStringOrthogonalPosF = .010
 	res@gsnLeftStringFontHeightF = .010
 	
@@ -380,7 +410,7 @@ res@cnFillDrawOrder = "PreDraw"
 res@mpOutlineDrawOrder = "Draw"
 res@mpGridAndLimbDrawOrder = "PostDraw"
 
-plot = gsn_csm_contour_map(wks,precipplot, res)          ; Plot filled contour map
+plot = gsn_csm_contour_map(wks,snowdepth_change, res)          ; Plot filled contour map
 plot = add_map_tickmarks(wks,plot,tmres)
 
 ;==============================================

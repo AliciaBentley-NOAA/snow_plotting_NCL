@@ -23,7 +23,7 @@ print("**************")
 
 period = 36     ;36
 
-name = "nmmb_WEASD_int2020121612_val2020121800"
+name = "arw2_WEASD_int2020102512_val2020102800"
 
 ;-------------------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------------------
@@ -32,18 +32,18 @@ name = "nmmb_WEASD_int2020121612_val2020121800"
 	timeUnits = "hours since 1800-01-01 00:00:00"
  
         iyyyy = 2020
-        imm = 12
-        idd = 16
+        imm = 10
+        idd = 25
         ihh = 12
 
 	syyyy = 2020 
-	smm = 12
-	sdd = 16
+	smm = 10
+	sdd = 26
 	shh = 12
 
         eyyyy = 2020
-        emm = 12
-        edd = 18
+        emm = 10
+        edd = 28
         ehh = 0
 
         idate = cd_inv_calendar(iyyyy,imm,idd,ihh,00,00,timeUnits,0)
@@ -79,7 +79,7 @@ print("end_fhr: "+end_fhr)
 
 ;------------------------------------------
 
-do tim = start_fhr+1,end_fhr,1
+do tim = start_fhr+3,end_fhr,3
 
 	if tim .ge. 100 then
         	fhr = tim
@@ -92,7 +92,7 @@ do tim = start_fhr+1,end_fhr,1
 	end if
         print("fhr: "+fhr)
 
-       filename = "/scratch2/NCEPDEV/ovp/Logan.Dawson/com/hiresw."+ymd+"/hiresw.t"+hour+"z.nmmb_5km.f"+fhr+".conus.grib2"
+       filename = "/scratch2/NCEPDEV/ovp/Marcel.Caron/MEG/data/MEG_20210204/hiresw."+ymd+"/hiresw.t"+hour+"z.arw_5km.f"+fhr+".conusmem2.grib2"
        if (isfilepresent(filename)) then
           print("File found!")
        else
@@ -108,7 +108,7 @@ do tim = start_fhr+1,end_fhr,1
 if tim .le. 1 then 
       precip = a->WEASD_P8_L1_GLC0_acc(:,:)
 else 
-      precip = a->WEASD_P8_L1_GLC0_acc1h(:,:)
+      precip = a->WEASD_P8_L1_GLC0_acc3h(:,:)
 end if
 ;      printVarSummary(precip_anl)
       precip=precip*0.0393701*10.0     ; mm to inches (times 10:1 ratio)
@@ -132,7 +132,7 @@ print("Successfully got data from files!")
 
 ;=============================================
 
-folder = (/"EC"/)
+folder = (/"OK"/)
 ;folder = (/"northamer","pacific","atlantic","europe","southpac","southamer","india","australia","africa","asia"/)   
 enddomain = dimsizes(folder)
 
@@ -344,6 +344,29 @@ tmres@tmYLValues = ispan(0,80,10)
 tmres@tmYRValues = ispan(0,80,10)
 end if
 
+if domain .eq. "OK" then
+res@mpProjection = "LambertConformal"
+res@mpLambertParallel2F = 35
+res@mpLambertParallel1F = 30
+res@mpLambertMeridianF = -97
+res@mpLimitMode = "LatLon"
+res@mpMinLatF = 31.5
+res@mpMaxLatF = 40.
+res@mpMinLonF = -105.
+res@mpMaxLonF = -91.
+delete(tmres@tmXBValues)
+tmres@tmYLOn = False
+tmres@tmYROn = False
+tmres@tmXBOn = False
+tmres@tmXBValues = ispan(-180,179,5)
+delete(tmres@tmYRValues)
+delete(tmres@tmYLValues)
+tmres@tmYLValues = ispan(0,80,5)
+tmres@tmYRValues = ispan(0,80,5)
+res@mpGridLatSpacingF := 5.
+res@mpGridLonSpacingF := 5.
+end if
+
 ;**********************************************
 
   curdate = edate	
@@ -359,7 +382,7 @@ end if
 	res@gsnRightString = " "
 	
 	res@gsnLeftStringFontColor = "black"
-	res@gsnLeftString = "(NMMB) 36-h WEASD (10:1) Init: "+ut_string(idate,"")+" | Fh: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
+	res@gsnLeftString = "(ARW2) 36-h WEASD (10:1) Init: "+ut_string(idate,"")+" | Fh: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
 	res@gsnLeftStringOrthogonalPosF = .010
 	res@gsnLeftStringFontHeightF = .010
 	
