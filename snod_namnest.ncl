@@ -364,7 +364,7 @@ end if
 	res@gsnRightString = " "
 	
 	res@gsnLeftStringFontColor = "black"
-	res@gsnLeftString = "(NAMNEST) 36-h SNOD Init: "+ut_string(idate,"")+" | Fhrs: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
+	res@gsnLeftString = "(NAM3km) 36-h SNOD Init: "+ut_string(idate,"")+" | Fhrs: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
 	res@gsnLeftStringOrthogonalPosF = .010
 	res@gsnLeftStringFontHeightF = .010
 	

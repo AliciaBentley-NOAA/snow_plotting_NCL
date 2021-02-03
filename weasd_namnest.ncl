@@ -359,7 +359,7 @@ end if
 	res@gsnRightString = " "
 	
 	res@gsnLeftStringFontColor = "black"
-	res@gsnLeftString = "(NAM) 36-h WEASD (10:1) Init: "+ut_string(idate,"")+" | Fhrs: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
+	res@gsnLeftString = "(NAM3km) 36-h WEASD (10:1) Init: "+ut_string(idate,"")+" | F: "+start_fhr+"-"+end_fhr+" | Val: "+ut_string(edate,"")
 	res@gsnLeftStringOrthogonalPosF = .010
 	res@gsnLeftStringFontHeightF = .010
 	
